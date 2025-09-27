@@ -13,6 +13,7 @@ const SIGSER_CTX = "sigser-Version-0.0.1"
 type SignedJson struct {
 	Json      string `json:"json"`
 	Signature string `json:"signature"`
+	// add timestamp
 }
 
 // serializer for client
