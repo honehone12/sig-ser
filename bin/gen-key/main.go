@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// private key is 64bytes pub/priv
+	// private key is 64bytes priv/pub
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		log.Fatal(err)
