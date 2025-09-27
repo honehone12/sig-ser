@@ -1,4 +1,4 @@
-module sig-ser
+module sigser
 
 go 1.24.6
 

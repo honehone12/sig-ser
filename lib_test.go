@@ -6,9 +6,29 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func TesNew(t *testing.T) {
-	if err := godotenv.Load(); err != nil {
-		panic(err)
+const (
+	PRIVATE_KEY_ENV = "SIGSER_PRIVATE_KEY"
+	PUBLIC_KEY_ENV  = "SIGSER_PUBLIC_KEY"
+)
+
+var (
+	ser *SigSer
+	de  *SigDe
+)
+
+func TestNew(t *testing.T) {
+	err := godotenv.Load()
+	if err != nil {
+		t.Fatal(err)
 	}
 
+	ser, err = NewSigSerFromEnv(PRIVATE_KEY_ENV)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	de, err = NewSigDeFromEnv(PUBLIC_KEY_ENV)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
