@@ -1,13 +1,17 @@
 package sigser
 
-import "crypto"
+import (
+	"crypto/ed25519"
+)
 
 // serializer for client
 type SigSer struct {
-	privateKey crypto.PrivateKey
+	privateKey ed25519.PrivateKey
 }
+
+func NewSigSer()
 
 // deserializer for server
 type SigDe struct {
-	publicKey crypto.PublicKey
+	publicKey ed25519.PublicKey
 }
