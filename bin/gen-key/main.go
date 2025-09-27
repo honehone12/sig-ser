@@ -2,14 +2,13 @@ package main
 
 import (
 	"crypto/ed25519"
-	"crypto/rand"
 	"encoding/base64"
 	"log"
 )
 
 func main() {
 	// private key is 64bytes priv/pub
-	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	pub, priv, err := ed25519.GenerateKey(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
