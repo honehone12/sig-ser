@@ -12,8 +12,8 @@ const (
 )
 
 var (
-	ser *SigSer
-	de  *SigDe
+	ser SigSer
+	de  SigDe
 )
 
 func TestNew(t *testing.T) {
