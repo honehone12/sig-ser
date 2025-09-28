@@ -1,6 +1,5 @@
 # sig-ser
-json with signature for server to server rpc
+json with signature for rpc
 
-this does NOT intend to care severe security for private servers.
-
-instead, this came up with a idea as a casual check for low cost public end points running on managed vm or container that have limited lifetime.
+i know the most and basic challenging thing for this kind of signature is "how to store private key ?"  
+but this kind of simple signature is still considerable for low cost project that is using websocket or some light protocol.
