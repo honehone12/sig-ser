@@ -14,8 +14,8 @@ type testData struct {
 }
 
 const (
-	PRIVATE_KEY_ENV = "SIGSER_PRIVATE_KEY"
-	PUBLIC_KEY_ENV  = "SIGSER_PUBLIC_KEY"
+	_PRIVATE_KEY_ENV = "SIGSER_PRIVATE_KEY"
+	_PUBLIC_KEY_ENV  = "SIGSER_PUBLIC_KEY"
 )
 
 var (
@@ -29,12 +29,12 @@ func TestNew(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ser, err = NewSigSerFromEnv(PRIVATE_KEY_ENV)
+	ser, err = NewSigSerFromEnv(_PRIVATE_KEY_ENV)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	de, err = NewSigDeFromEnv(PUBLIC_KEY_ENV)
+	de, err = NewSigDeFromEnv(_PUBLIC_KEY_ENV)
 	if err != nil {
 		t.Fatal(err)
 	}
