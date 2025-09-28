@@ -3,17 +3,20 @@ package sigser
 import (
 	"crypto/ed25519"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"os"
+	"time"
 )
 
 const SIGSER_CTX = "sigser-Version-0.0.1"
+const MAX_TIMESTAMP_GAP_SEC = 60
 
 type SignedJson struct {
 	Json      string `json:"json"`
 	Signature string `json:"signature"`
-	// todo: add timestamp
+	Timestamp int64  `json:"timestamp"`
 }
 
 // serializer for client
@@ -57,17 +60,24 @@ func (ser *SigSer) Marshal(v any) ([]byte, error) {
 		return nil, err
 	}
 
+	now := time.Now().Unix()
+
+	b := make([]byte, len(inner)+8)
+	binary.BigEndian.PutUint64(b, uint64(now))
+	copy(b[8:], inner)
+
 	op := ed25519.Options{
 		Context: SIGSER_CTX,
 	}
-	sig, err := ser.privateKey.Sign(nil, inner, &op)
+	sig, err := ser.privateKey.Sign(nil, b, &op)
 	if err != nil {
 		return nil, err
 	}
 
 	sigJ := SignedJson{
-		Json:      base64.StdEncoding.EncodeToString(inner),
+		Json:      string(inner),
 		Signature: base64.StdEncoding.EncodeToString(sig),
+		Timestamp: now,
 	}
 
 	return json.Marshal(sigJ)
@@ -115,10 +125,17 @@ func (de SigDe) Unmarshal(data []byte, v any) error {
 		return err
 	}
 
-	inner, err := base64.StdEncoding.DecodeString(sigJ.Json)
-	if err != nil {
-		return err
+	// check timestamp
+	now := time.Now().Unix()
+	gap := now - sigJ.Timestamp
+	if gap > MAX_TIMESTAMP_GAP_SEC {
+		return errors.New("timestamp is too old")
 	}
+
+	inner := []byte(sigJ.Json)
+	b := make([]byte, len(inner)+8)
+	binary.BigEndian.PutUint64(b, uint64(sigJ.Timestamp))
+	copy(b[8:], inner)
 
 	sig, err := base64.StdEncoding.DecodeString(sigJ.Signature)
 	if err != nil {
@@ -128,7 +145,7 @@ func (de SigDe) Unmarshal(data []byte, v any) error {
 	op := ed25519.Options{
 		Context: SIGSER_CTX,
 	}
-	err = ed25519.VerifyWithOptions(de.publicKey, inner, sig, &op)
+	err = ed25519.VerifyWithOptions(de.publicKey, b, sig, &op)
 	if err != nil {
 		return err
 	}
