@@ -118,6 +118,15 @@ func NewSigDe(publicKey ed25519.PublicKey) (SigDe, error) {
 	return SigDe{publicKey}, nil
 }
 
+func checkTimestamp(origin int64) error {
+	now := time.Now().Unix()
+	gap := now - origin
+	if gap > MAX_TIMESTAMP_GAP_SEC {
+		return errors.New("timestamp is too old")
+	}
+	return nil
+}
+
 func (de SigDe) Unmarshal(data []byte, v any) error {
 	sigJ := SignedJson{}
 	err := json.Unmarshal(data, &sigJ)
@@ -125,11 +134,9 @@ func (de SigDe) Unmarshal(data []byte, v any) error {
 		return err
 	}
 
-	// check timestamp
-	now := time.Now().Unix()
-	gap := now - sigJ.Timestamp
-	if gap > MAX_TIMESTAMP_GAP_SEC {
-		return errors.New("timestamp is too old")
+	err = checkTimestamp(sigJ.Timestamp)
+	if err != nil {
+		return err
 	}
 
 	inner := []byte(sigJ.Json)
