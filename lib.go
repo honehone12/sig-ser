@@ -119,6 +119,10 @@ func NewSigDe(publicKey ed25519.PublicKey) (SigDe, error) {
 }
 
 func checkTimestamp(origin int64) error {
+	// if time stamp is zero or minus,
+	// gap become now or bigger
+	// so no special check is needed
+
 	now := time.Now().Unix()
 	gap := now - origin
 	if gap > MAX_TIMESTAMP_GAP_SEC {
