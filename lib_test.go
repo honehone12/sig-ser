@@ -63,16 +63,16 @@ func TestNewFail(t *testing.T) {
 }
 
 func TestCheckTimestamp(t *testing.T) {
-	now := time.Now().Unix()
-	if err := checkTimestamp(now); err != nil {
+	now := uint64(time.Now().Unix())
+	if err := CheckTimestamp(now); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCheckTimestampFail(t *testing.T) {
-	now := time.Now().Unix()
+	now := uint64(time.Now().Unix())
 	now -= 100
-	if err := checkTimestamp(now); err == nil {
+	if err := CheckTimestamp(now); err == nil {
 		t.Fail()
 	}
 }
