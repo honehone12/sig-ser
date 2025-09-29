@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-const SIGSER_CTX = "sigser-Version-0.0.1"
-const MAX_TIMESTAMP_GAP_SEC = 60
+const _SIGSER_CTX = "sigser-Version-0.0.1"
+const _MAX_TIMESTAMP_GAP_SEC = 60
 
 type SignedJson struct {
 	Json      string `json:"json"`
@@ -67,7 +67,7 @@ func (ser *SigSer) Marshal(v any) ([]byte, error) {
 	copy(b[8:], inner)
 
 	op := ed25519.Options{
-		Context: SIGSER_CTX,
+		Context: _SIGSER_CTX,
 	}
 	sig, err := ser.privateKey.Sign(nil, b, &op)
 	if err != nil {
@@ -125,7 +125,7 @@ func checkTimestamp(origin int64) error {
 
 	now := time.Now().Unix()
 	gap := now - origin
-	if gap > MAX_TIMESTAMP_GAP_SEC {
+	if gap > _MAX_TIMESTAMP_GAP_SEC {
 		return errors.New("timestamp is too old")
 	}
 	return nil
@@ -154,7 +154,7 @@ func (de SigDe) Unmarshal(data []byte, v any) error {
 	}
 
 	op := ed25519.Options{
-		Context: SIGSER_CTX,
+		Context: _SIGSER_CTX,
 	}
 	err = ed25519.VerifyWithOptions(de.publicKey, b, sig, &op)
 	if err != nil {
