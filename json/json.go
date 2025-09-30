@@ -8,15 +8,7 @@ import (
 	"time"
 )
 
-type SigSerJson struct {
-	inner sigser.SigSer
-}
-
-type SigDeJson struct {
-	inner sigser.SigDe
-}
-
-func (ser *SigSerJson) Marshal(v any) ([]byte, error) {
+func Marshal(v any, ser sigser.SigSer) ([]byte, error) {
 	inner, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -28,7 +20,7 @@ func (ser *SigSerJson) Marshal(v any) ([]byte, error) {
 	binary.BigEndian.PutUint64(b, uint64(now))
 	copy(b[8:], inner)
 
-	sig, err := ser.inner.Sign(b)
+	sig, err := ser.Sign(b)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +34,7 @@ func (ser *SigSerJson) Marshal(v any) ([]byte, error) {
 	return json.Marshal(sigP)
 }
 
-func (de *SigDeJson) Unmarshal(data []byte, v any) error {
+func Unmarshal(data []byte, v any, de sigser.SigDe) error {
 	sigP := sigser.SignedPayload{}
 	err := json.Unmarshal(data, &sigP)
 	if err != nil {
@@ -64,7 +56,7 @@ func (de *SigDeJson) Unmarshal(data []byte, v any) error {
 		return err
 	}
 
-	err = de.inner.Verify(inner, sig)
+	err = de.Verify(inner, sig)
 	if err != nil {
 		return err
 	}
