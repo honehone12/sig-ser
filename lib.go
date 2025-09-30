@@ -17,16 +17,6 @@ type SignedPayload struct {
 	Timestamp uint64 `json:"timestamp" msgpack:"timestamp"`
 }
 
-// serializer interface for client
-type SigSerialize interface {
-	SignMarshal(v any) ([]byte, error)
-}
-
-// deserilzer interface for server
-type SigDeserialize interface {
-	SignUnmarshal(data []byte, v any) error
-}
-
 // key holder for client
 type SigSer struct {
 	privateKey ed25519.PrivateKey
