@@ -1,7 +1,10 @@
-package sigser
+package sigser_test
 
 import (
 	"crypto/ed25519"
+	"sigser"
+	"sigser/json"
+
 	"testing"
 	"time"
 
@@ -18,45 +21,30 @@ const (
 	_PUBLIC_KEY_ENV  = "SIGSER_PUBLIC_KEY"
 )
 
-var (
-	ser SigSer
-	de  SigDe
-)
-
-func TestNew(t *testing.T) {
+func TestStart(t *testing.T) {
 	err := godotenv.Load()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ser, err = NewSigSerFromEnv(_PRIVATE_KEY_ENV)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	de, err = NewSigDeFromEnv(_PUBLIC_KEY_ENV)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestNewFail(t *testing.T) {
-	_, err := NewSigSerFromString("badprivatekey")
+	_, err := sigser.NewSigSerFromString("badprivatekey")
 	if err == nil {
 		t.Fail()
 	}
 
-	_, err = NewSigSer([]byte{0})
+	_, err = sigser.NewSigSer([]byte{0})
 	if err == nil {
 		t.Fail()
 	}
 
-	_, err = NewSigDeFromString("badpublickey")
+	_, err = sigser.NewSigDeFromString("badpublickey")
 	if err == nil {
 		t.Fail()
 	}
 
-	_, err = NewSigDe([]byte{0})
+	_, err = sigser.NewSigDe([]byte{0})
 	if err == nil {
 		t.Fail()
 	}
@@ -64,7 +52,7 @@ func TestNewFail(t *testing.T) {
 
 func TestCheckTimestamp(t *testing.T) {
 	now := uint64(time.Now().Unix())
-	if err := CheckTimestamp(now); err != nil {
+	if err := sigser.CheckTimestamp(now); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -72,7 +60,7 @@ func TestCheckTimestamp(t *testing.T) {
 func TestCheckTimestampFail(t *testing.T) {
 	now := uint64(time.Now().Unix())
 	now -= 100
-	if err := CheckTimestamp(now); err == nil {
+	if err := sigser.CheckTimestamp(now); err == nil {
 		t.Fail()
 	}
 }
@@ -83,13 +71,23 @@ func TestGoodPath(t *testing.T) {
 		Num: 99,
 	}
 
-	b, err := ser.Marshal(encD)
+	ser, err := sigser.NewSigSerFromEnv(_PRIVATE_KEY_ENV)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	b, err := json.Marshal(encD, ser)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	de, err := sigser.NewSigDeFromEnv(_PUBLIC_KEY_ENV)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var decD *testData
-	if err = de.Unmarshal(b, &decD); err != nil {
+	if err = json.Unmarshal(b, &decD, de); err != nil {
 		t.Fatal(err)
 	}
 
@@ -107,7 +105,7 @@ func TestBadPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	badSer, err := NewSigSer(badPriv)
+	badSer, err := sigser.NewSigSer(badPriv)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,13 +115,18 @@ func TestBadPath(t *testing.T) {
 		Num: -99,
 	}
 
-	b, err := badSer.Marshal(encD)
+	b, err := json.Marshal(encD, badSer)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	de, err := sigser.NewSigDeFromEnv(_PUBLIC_KEY_ENV)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var decD *testData
-	if err = de.Unmarshal(b, &decD); err == nil {
+	if err = json.Unmarshal(b, &decD, de); err == nil {
 		t.Fail()
 	}
 }

@@ -14,10 +14,10 @@ func Marshal(v any, ser sigser.SigSer) ([]byte, error) {
 		return nil, err
 	}
 
-	now := time.Now().Unix()
+	now := uint64(time.Now().Unix())
 
 	b := make([]byte, len(inner)+8)
-	binary.BigEndian.PutUint64(b, uint64(now))
+	binary.BigEndian.PutUint64(b, now)
 	copy(b[8:], inner)
 
 	sig, err := ser.Sign(b)
@@ -28,7 +28,7 @@ func Marshal(v any, ser sigser.SigSer) ([]byte, error) {
 	sigP := sigser.SignedPayload{
 		Payload:   string(inner),
 		Signature: base64.StdEncoding.EncodeToString(sig),
-		Timestamp: uint64(now),
+		Timestamp: now,
 	}
 
 	return json.Marshal(sigP)
@@ -56,7 +56,7 @@ func Unmarshal(data []byte, v any, de sigser.SigDe) error {
 		return err
 	}
 
-	err = de.Verify(inner, sig)
+	err = de.Verify(b, sig)
 	if err != nil {
 		return err
 	}
